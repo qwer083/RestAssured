@@ -9,6 +9,7 @@ import pojos.request.Booking;
 import pojos.response.BookingResponseDto;
 import tests.helpers.Authentificator;
 import tests.helpers.BookingGenerator;
+import tests.helpers.BookingGenerator;
 import tests.helpers.Constants;
 
 import java.time.LocalDate;
@@ -20,7 +21,7 @@ public class UpdateBookingTest extends BaseTest {
     void PartialUpdate() {
         Booking.BookingDates bookingDates = new Booking.BookingDates(LocalDate.now().plusDays(2), LocalDate.now().plusDays(30));
         BookingResponseDto generateBooking = BookingGenerator.createBooking(requestSpecification, bookingDates);
-        String bookingId = generateBooking.getBookingId().toString();
+        Long bookingId = generateBooking.getBookingId();
         Booking bookingBeforeChange = generateBooking.getBooking();
 
         String newLastName = "newLastName";
@@ -46,6 +47,7 @@ public class UpdateBookingTest extends BaseTest {
         Assertions.assertEquals(bookingBeforeChange.isDepositPaid(), bookingAfterChange.isDepositPaid(), "Флаг оплаты депозита не должен был изменитья");
         Assertions.assertEquals(newTotalPrice, bookingAfterChange.getTotalPrice(), "Оплаченная стоимость не поменялась");
         Assertions.assertEquals(newLastName, bookingAfterChange.getLastname(), "Фамилия пользователя не поменялась");
+        Assertions.assertEquals(bookingAfterChange, BookingGenerator.getBooking(requestSpecification, bookingId), "Полученное при get-запросе бронирования отличается от ожидаемого");
 
 
     }
@@ -54,7 +56,7 @@ public class UpdateBookingTest extends BaseTest {
     void fullUpdate() {
         Booking.BookingDates bookingDates = new Booking.BookingDates(LocalDate.now().plusDays(2), LocalDate.now().plusDays(30));
         BookingResponseDto generateBooking = BookingGenerator.createBooking(requestSpecification, bookingDates);
-        String bookingId = generateBooking.getBookingId().toString();
+        Long bookingId = generateBooking.getBookingId();
 
 
         Booking bookingBeforeChange = generateBooking.getBooking();
@@ -71,7 +73,7 @@ public class UpdateBookingTest extends BaseTest {
                 .cookie("token", tokenDto.getToken())
                 .when()
                 .body(bookingForRequest)
-                .patch(Constants.BOOKING_CONTROLLER_PATH + "/" + bookingId)
+                .put(Constants.BOOKING_CONTROLLER_PATH + "/" + bookingId)
                 .then()
                 .statusCode(200)
                 .log()
@@ -79,12 +81,12 @@ public class UpdateBookingTest extends BaseTest {
                 .extract()
                 .as(Booking.class);
 
-        Assertions.assertEquals(bookingBeforeChange.getFirstname(), bookingAfterChange.getFirstname(),"Имя пользователя не должно было измениться");
-        Assertions.assertEquals(bookingBeforeChange.getLastname(), bookingAfterChange.getLastname(),"Фамилия пользователя не должна было измениться");
-        Assertions.assertEquals(bookingBeforeChange.getAdditionalneeds(), bookingAfterChange.getAdditionalneeds(),"Комментарий не должен был измениться");
-        Assertions.assertEquals(bookingBeforeChange.getBookingDates().getCheckOut(), bookingAfterChange.getBookingDates().getCheckOut(),"Дата выезда не дожна была измениться");
-        Assertions.assertEquals(bookingBeforeChange.getTotalPrice(), bookingAfterChange.getTotalPrice(),"Флаг оплаты депозита не изменился");
-        Assertions.assertEquals(bookingAfterChange.getBookingDates().getCheckIn(), newCheckIn,"Дата заезда не изменилась");
-
+        Assertions.assertEquals(bookingBeforeChange.getFirstname(), bookingAfterChange.getFirstname(), "Имя пользователя не должно было измениться");
+        Assertions.assertEquals(bookingBeforeChange.getLastname(), bookingAfterChange.getLastname(), "Фамилия пользователя не должна было измениться");
+        Assertions.assertEquals(bookingBeforeChange.getAdditionalneeds(), bookingAfterChange.getAdditionalneeds(), "Комментарий не должен был измениться");
+        Assertions.assertEquals(bookingBeforeChange.getBookingDates().getCheckOut(), bookingAfterChange.getBookingDates().getCheckOut(), "Дата выезда не дожна была измениться");
+        Assertions.assertEquals(bookingBeforeChange.getTotalPrice(), bookingAfterChange.getTotalPrice(), "Флаг оплаты депозита не изменился");
+        Assertions.assertEquals(bookingAfterChange.getBookingDates().getCheckIn(), newCheckIn, "Дата заезда не изменилась");
+        Assertions.assertEquals(bookingAfterChange, BookingGenerator.getBooking(requestSpecification, bookingId), "Полученное при get-запросе бронирования отличается от ожидаемого");
     }
 }

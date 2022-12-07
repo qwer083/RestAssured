@@ -7,3 +7,4 @@ public class AuthDto {
     private final String password;
     private final String username;
 }
+

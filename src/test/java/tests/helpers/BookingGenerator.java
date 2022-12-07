@@ -1,12 +1,12 @@
 package tests.helpers;
 
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.requestSpecification;
 import io.restassured.specification.RequestSpecification;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.Assertions;
 import pojos.request.Booking;
 import pojos.response.BookingResponseDto;
-
-import static io.restassured.RestAssured.given;
 
 public class BookingGenerator {
     private static final Faker faker = new Faker();
@@ -37,7 +37,17 @@ public class BookingGenerator {
                         " Сгенерировано: %s \n Получено в ответе: %s", request.toString(), responseDto.getBooking().toString()));
         Assertions.assertNotNull(responseDto.getBookingId(), "При генерации бронирования id не был сгенерирован");
         return responseDto;
-
     }
 
+    public static Booking getBooking(RequestSpecification specification, Long bookingId) {
+        Booking responseDto = specification
+                .when()
+                .get(Constants.BOOKING_CONTROLLER_PATH + "/" + bookingId)
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .as(Booking.class);
+        return responseDto;
+    }
 }
